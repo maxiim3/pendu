@@ -1,67 +1,145 @@
+/**
+ * Count will be incremented after each valid letter
+ * @type {number}
+ */
 let count = 0;
-let word = "anticonstitutionnel"
+
+/**
+ * Some random list of words
+ * @type {string[]}
+ */
+let words = ['nobody', "atlas", "mountain", "parallel", "mathematics", "beautiful", "neighbour", "passive", "bounce"]
+
+/**
+ * Get a random index from **words**
+ * @type {number}
+ */
+const random = Math.floor(Math.random() * words.length)
+
+/**
+ * Get the word at the random index
+ * @type {string}
+ */
+let word = words[random]
+
+/**
+ * Will be used to store all the input keys that are invalid
+ * @type {*[]}
+ */
 let mistakes = []
+
+/**
+ * Will be used to store all the DOM elements wich represents a span node for each letter of the worls
+ * @type {*[]}
+ */
 const DOMElements = []
 
+
+/**
+ * Targets the div that will display the input letter
+ * @type {HTMLElement}
+ */
+const displayInput = document.getElementById('display-input')
+
+/**
+ * Is an array of all letters split from **word**
+ * @type {string[]}
+ */
 const letters = word.toUpperCase().split("")
+
+/**
+ * target the div that wraps all the letters in the DOM
+ * @type {HTMLElement}
+ */
 const parent = document.querySelector('.letter-wrapper')
-const submit = document.querySelector('button')
-const input = document.querySelector('input')
-createNode(letters)
-DOMElements.forEach(el => {
-    setClassTo(el, "letter hide")
-    parent.appendChild(el)
-})
 
-function setClassTo(input, classes) {
-    input.className = classes
+/**
+ * For each letter of **letters**,
+ * create a span node,
+ * set its value/class/dataset and push it to the **DOMElement** array
+ * @type {function}
+ */
+function createElements() {
+    letters.forEach(letter => {
+                        const spanLetter = document.createElement('span')
+                        spanLetter.innerText = letter
+                        spanLetter.className = 'letter'
+                        spanLetter.dataset.isVisible = "false"
+                        DOMElements.push(spanLetter)
+                    }
+    )
 }
 
-function resetInput(input) {
-    input.value = ""
+/**
+ * for each **DOMElement** of the array, will add it to it's **parent** div
+ * @type {function}
+ */
+function appendDomElements() {
+    DOMElements.forEach(el => {
+        parent.appendChild(el)
+    })
 }
 
-function createNode(arr) {
-    arr.forEach(el => {
-        const spanLetter = document.createElement('span')
-        spanLetter.innerText = el
-        DOMElements.push(spanLetter)
-    });
-}
+/**
+ * Add an event Listener to the **keydown** event,
+ * Will check count, mistakes, and run setValid() if condition is fulfilled
+ * @type {function}
+ */
+function listenToKeyInputs() {
+    document.addEventListener('keydown', (event) => {
+        const msg = document.createElement('div')
+        const name = event.key;
 
-function lookForLetter(arr, value) {
-    for (let index = 0; index < arr.length; index++) {
+        displayInput.dataset.displayInput = ""
 
-        if (arr[index].toUpperCase() === value.toUpperCase()) {
-            count++
-            setClassTo(DOMElements.at(index), "letter")
+        let uniqueMistakes = [...new Set(mistakes)]
+
+        if (uniqueMistakes.length === 3) {
+            msg.innerText = "YOU LOOOSE"
+            msg.className = "main"
+            document.querySelector('.wrapper').appendChild(msg)
+        }
+        else if (count === letters.length) {
+            msg.innerText = "YOU WOOOOONNNN"
+            msg.className = "main"
+            document.querySelector('.wrapper').appendChild(msg)
+            console.log(3)
         }
         else {
-            arr.push(value.toUpperCase())
+            uniqueMistakes.some(el => el !== name.toUpperCase() && mistakes.push(el.toUpperCase()));
+            letters.some(el => el === name.toUpperCase() && count++)
+            displayInput.dataset.displayInput = name.toUpperCase();
+            console.log(letters.length)
+            setValid(name)
+        }
+
+
+    }, false);
+}
+
+/**
+ * Check if the value of the input {e} exist in the word, returns the index.
+ *
+ * From this **index**, get the **DOMElement**, and set its dataset to *'true'*
+ * @type {function}
+ * @param e
+ */
+function setValid(e) {
+    const inputValue = e.toUpperCase()
+
+    for (let index = 0; index < letters.length; index++) {
+        if (letters[index] === inputValue) {
+            DOMElements[index].dataset.isVisible = "true"
         }
     }
 }
 
-submit.addEventListener("click", (e) => {
-    e.preventDefault()
-    const inputValue = input.value
+/**
+ * Runs this function onload
+ */
+(function () {
+    createElements()
+    appendDomElements()
+    listenToKeyInputs()
 
-    lookForLetter(letters, inputValue)
-    resetInput(input)
-    let uniqueMistakes = [...new Set(mistakes)]
-    console.log(uniqueMistakes)
-    if (uniqueMistakes.length === 3) {
-        const msg = document.createElement('div')
-        msg.innerText = "YOU LOOOSE"
-        msg.className = "letter"
-        document.querySelector('.wrapper').appendChild(msg)
-    }
-    else if (count === letters.length) {
-        const msg = document.createElement('div')
-        msg.innerText = "YOU WOOOOONNNN"
-        msg.className = "letter"
-        document.querySelector('.wrapper').appendChild(msg)
-    }
-})
-
-
+})()

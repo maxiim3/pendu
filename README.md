@@ -1,0 +1,1 @@
+Test de jeu du pendu avec Vanilla JS
